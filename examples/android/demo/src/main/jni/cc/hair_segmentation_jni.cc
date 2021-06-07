@@ -47,9 +47,9 @@ JNIEXPORT JNICALL jint TNN_HAIR_SEGMENTATION(init)(JNIEnv *env, jobject thiz, js
     option->library_path = "";
     option->proto_content = protoContent;
     option->model_content = modelContent;
-    option->input_width = 256;
-    option->input_height = 256;
-    option->mode = 1;
+    option->input_width = 640;
+    option->input_height = 480;
+    option->mode = 0;
     if (gComputeUnitType == 1) {
         option->compute_units = TNN_NS::TNNComputeUnitsGPU;
         status = gSegmentator->Init(option);

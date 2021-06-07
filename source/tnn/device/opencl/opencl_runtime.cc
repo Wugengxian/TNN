@@ -36,7 +36,7 @@ namespace TNN_NS {
     flock(fileno(f), LOCK_UN);
 #endif
 
-extern const std::map<std::string, std::vector<unsigned char>> g_opencl_program_map;
+const std::map<std::string, std::vector<unsigned char>> g_opencl_program_map;
 
 static std::mutex g_mtx;
 
