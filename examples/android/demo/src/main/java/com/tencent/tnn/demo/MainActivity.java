@@ -13,6 +13,7 @@ import com.tencent.tnn.demo.ImageClassifyDetector.ImageClassifyDetectActivity;
 import com.tencent.tnn.demo.ImageFaceDetector.ImageFaceDetectActivity;
 import com.tencent.tnn.demo.ImageObjectDetectorSSD.ImageObjectDetectSSDActivity;
 import com.tencent.tnn.demo.ImageOCRDetector.ImageOCRDetectActivity;
+import com.tencent.tnn.demo.SeperateMenu.MenuActivity;
 import com.tencent.tnn.demo.StreamBlazeFaceAlign.StreamBlazeFaceAlignActivity;
 import com.tencent.tnn.demo.StreamBlazeFaceDetector.StreamBlazeFaceDetectActivity;
 import com.tencent.tnn.demo.StreamFaceDetector.StreamFaceDetectActivity;
@@ -43,6 +44,18 @@ public class MainActivity extends Activity {
     }
 
     private void init() {
+        findViewById(R.id.separate_btn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!isShowedActivity) {
+                    isShowedActivity = true;
+                    Intent intent = new Intent();
+                    Activity activity = MainActivity.this;
+                    intent.setClass(activity, MenuActivity.class);
+                    activity.startActivity(intent);
+                }
+            }
+        });
         findViewById(R.id.stream_detect_btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
