@@ -1,6 +1,7 @@
 package com.tencent.tnn.demo.ImageClassifyDetector;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -15,9 +16,11 @@ import android.widget.ToggleButton;
 import com.tencent.tnn.demo.FileUtils;
 import com.tencent.tnn.demo.Helper;
 import com.tencent.tnn.demo.ImageClassify;
+import com.tencent.tnn.demo.ImageInfo;
 import com.tencent.tnn.demo.R;
 import com.tencent.tnn.demo.common.fragment.BaseFragment;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 
@@ -55,8 +58,8 @@ public class ImageClassifyDetectFragment extends BaseFragment {
 
         //copy detect model to sdcard
         String[] modelPathsDetector = {
-                "squeezenet_v1.1.tnnmodel",
-                "squeezenet_v1.1.tnnproto",
+                "style.tnnmodel",
+                "style.tnnproto",
         };
 
         for (int i = 0; i < modelPathsDetector.length; i++) {
@@ -179,15 +182,14 @@ public class ImageClassifyDetectFragment extends BaseFragment {
         }
         int result = mImageClassify.init(modelPath, NET_INPUT, NET_INPUT, device);
         if(result == 0) {
-            Log.d(TAG, "detect from image");
-            int [] indexArray= mImageClassify.detectFromImage(scaleBitmap, NET_INPUT, NET_INPUT);
-            Log.d(TAG, "detect from image result " + result + " index :" + indexArray);
-            if(indexArray != null && indexArray.length > 0) {
-                Log.d(TAG, "detect index " + indexArray[0]);
-                String resultText = "result: " + result_list.get(indexArray[0]) + " " + Helper.getBenchResult();
-                TextView result_view = (TextView)$(R.id.result);
-                result_view.setText(resultText);
-            }
+            ImageInfo[] indexArray= mImageClassify.detectFromImage(scaleBitmap, NET_INPUT, NET_INPUT);
+            ImageInfo imageInfo = indexArray[0];
+            Bitmap bitmap = Bitmap.createBitmap(imageInfo.image_width, imageInfo.image_height, Bitmap.Config.ARGB_8888);
+            ByteBuffer buffer = ByteBuffer.wrap(imageInfo.data);
+            bitmap.copyPixelsFromBuffer(buffer);
+            Bitmap scaleBitmap2 = Bitmap.createScaledBitmap(bitmap, originBitmap.getWidth(), originBitmap.getHeight(), false);
+            source.setImageDrawable(null);
+            source.setImageBitmap(scaleBitmap2);
             mImageClassify.deinit();
         } else {
             Log.e(TAG, "failed to init model " + result);

@@ -12,24 +12,30 @@
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 
-#include "image_classifier.h"
+#include "style.h"
 #include "image_classify_jni.h"
 #include "helper_jni.h"
 #include <android/bitmap.h>
 
-static std::shared_ptr<TNN_NS::ImageClassifier> gDetector;
+static std::shared_ptr<TNN_NS::Style> gDetector;
 static int gComputeUnitType = 0;
+static jclass clsImageInfo;
+static jmethodID midconstructorImageInfo;
+static jfieldID fidimage_width;
+static jfieldID fidimage_height;
+static jfieldID fidimage_channel;
+static jfieldID fiddata;
 
 JNIEXPORT JNICALL jint TNN_CLASSIFY(init)(JNIEnv *env, jobject thiz, jstring modelPath, jint width, jint height, jint computeUnitType)
 {
     // Reset bench description
     setBenchResult("");
     std::vector<int> nchw = {1, 3, height, width};
-    gDetector = std::make_shared<TNN_NS::ImageClassifier>();
+    gDetector = std::make_shared<TNN_NS::Style>();
     std::string protoContent, modelContent;
     std::string modelPathStr(jstring2string(env, modelPath));
-    protoContent = fdLoadFile(modelPathStr + "/squeezenet_v1.1.tnnproto");
-    modelContent = fdLoadFile(modelPathStr + "/squeezenet_v1.1.tnnmodel");
+    protoContent = fdLoadFile(modelPathStr + "/style.tnnproto");
+    modelContent = fdLoadFile(modelPathStr + "/style.tnnmodel");
     LOGI("proto content size %d model content size %d", protoContent.length(), modelContent.length());
     TNN_NS::Status status = TNN_NS::TNN_OK;
     gComputeUnitType = computeUnitType;
@@ -57,15 +63,24 @@ JNIEXPORT JNICALL jint TNN_CLASSIFY(init)(JNIEnv *env, jobject thiz, jstring mod
         return -1;
     }
 
+    if (clsImageInfo == NULL) {
+        clsImageInfo = static_cast<jclass>(env->NewGlobalRef(env->FindClass("com/tencent/tnn/demo/ImageInfo")));
+        midconstructorImageInfo = env->GetMethodID(clsImageInfo, "<init>", "()V");
+        fidimage_width = env->GetFieldID(clsImageInfo, "image_width" , "I");
+        fidimage_height = env->GetFieldID(clsImageInfo, "image_height" , "I");
+        fidimage_channel = env->GetFieldID(clsImageInfo, "image_channel" , "I");
+        fiddata = env->GetFieldID(clsImageInfo, "data" , "[B");
+    }
+
     return 0;
 }
 
 JNIEXPORT jboolean TNN_CLASSIFY(checkNpu)(JNIEnv *env, jobject thiz, jstring modelPath) {
-    TNN_NS::ImageClassifier tmpDetector;
+    TNN_NS::Style tmpDetector;
     std::string protoContent, modelContent;
     std::string modelPathStr(jstring2string(env, modelPath));
-    protoContent = fdLoadFile(modelPathStr + "/squeezenet_v1.1.tnnproto");
-    modelContent = fdLoadFile(modelPathStr + "/squeezenet_v1.1.tnnmodel");
+    protoContent = fdLoadFile(modelPathStr + "/style.tnnproto");
+    modelContent = fdLoadFile(modelPathStr + "/style.tnnmodel");
 
     auto option = std::make_shared<TNN_NS::TNNSDKOption>();
     option->compute_units = TNN_NS::TNNComputeUnitsHuaweiNPU;
@@ -86,9 +101,9 @@ JNIEXPORT JNICALL jint TNN_CLASSIFY(deinit)(JNIEnv *env, jobject thiz)
     gDetector = nullptr;
     return 0;
 }
-JNIEXPORT JNICALL jintArray TNN_CLASSIFY(detectFromImage)(JNIEnv *env, jobject thiz, jobject imageSource, jint width, jint height)
+JNIEXPORT JNICALL jobjectArray TNN_CLASSIFY(detectFromImage)(JNIEnv *env, jobject thiz, jobject imageSource, jint width, jint height)
 {
-    jintArray resultArray;
+    jobjectArray imageInfoArray;
     int ret = -1;
     AndroidBitmapInfo  sourceInfocolor;
     void*              sourcePixelscolor;
@@ -107,6 +122,7 @@ JNIEXPORT JNICALL jintArray TNN_CLASSIFY(detectFromImage)(JNIEnv *env, jobject t
 
     TNN_NS::BenchOption bench_option;
     bench_option.forward_count = 20;
+    std::vector<TNN_NS::ImageInfo> imageInfoList;
     gDetector->SetBenchOption(bench_option);
 
     TNN_NS::DeviceType dt = TNN_NS::DEVICE_ARM;
@@ -120,26 +136,36 @@ JNIEXPORT JNICALL jintArray TNN_CLASSIFY(detectFromImage)(JNIEnv *env, jobject t
     //get output map
     gDetector->ProcessSDKOutput(output);
 
+    imageInfoList.push_back(dynamic_cast<TNN_NS::StyleOutput *>(output.get())->image);
+
     AndroidBitmap_unlockPixels(env, imageSource);
 
     if (status != TNN_NS::TNN_OK) {
         return 0;
     }
-    char temp[128] = "";
-    std::string device = "arm";
-    if (gComputeUnitType == 1) {
-        device = "gpu";
-    } else if (gComputeUnitType == 2) {
-        device = "huawei_npu";
-    }
-    sprintf(temp, " device: %s \ntime: ", device.c_str());
-    std::string computeUnitTips(temp);
-    std::string resultTips = std::string(computeUnitTips + gDetector->GetBenchResult().Description());
-    setBenchResult(resultTips);
-    LOGI("classify id %d", resultList[0]);
-    resultArray = env->NewIntArray(1);
-    resultList[0] =  dynamic_cast<TNN_NS::ImageClassifierOutput*>(output.get())->class_id;
-    env->SetIntArrayRegion(resultArray, 0, 1, resultList);
+    if (imageInfoList.size() > 0) {
+        imageInfoArray = env->NewObjectArray(imageInfoList.size(), clsImageInfo, NULL);
+        for (int i = 0; i < imageInfoList.size(); i++) {
+            jobject objImageInfo = env->NewObject(clsImageInfo, midconstructorImageInfo);
+            int image_width = imageInfoList[i].image_width;
+            int image_height = imageInfoList[i].image_height;
+            int image_channel = imageInfoList[i].image_channel;
+            int dataNum = image_channel * image_width * image_height;
 
-    return resultArray;
+            env->SetIntField(objImageInfo, fidimage_width, image_width);
+            env->SetIntField(objImageInfo, fidimage_height, image_height);
+            env->SetIntField(objImageInfo, fidimage_channel, image_channel);
+
+            jbyteArray jarrayData = env->NewByteArray(dataNum);
+            env->SetByteArrayRegion(jarrayData, 0, dataNum , (jbyte*)imageInfoList[i].data.get());
+            env->SetObjectField(objImageInfo, fiddata, jarrayData);
+
+            env->SetObjectArrayElement(imageInfoArray, i, objImageInfo);
+            env->DeleteLocalRef(objImageInfo);
+        }
+        return imageInfoArray;
+    } else {
+        return 0;
+    }
+
 }
