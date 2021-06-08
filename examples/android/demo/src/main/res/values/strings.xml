@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">tnn-demo</string>
     <string name="tnn_title">Tencent TNN DEMO</string>
+    <string name="tnn_separate_btn_name">选择功能</string>
     <string name="tnn_fd_stream_btn_name">人脸检测-视频输入</string>
     <string name="tnn_fd_image_btn_name">人脸检测-图片输入</string>
     <string name="tnn_ic_image_btn_name">图像分类-图片输入</string>
@@ -16,4 +17,8 @@
     <string name="tnn_pdl_stream_btn_name">人体关键点-BlazePose-视频输入</string>
     <string name="tnn_sd_stream_btn_name">人体关键点-腾讯微视-视频输入</string>
     <string name="tnn_ocrdet_stream_btn_name">OCR检测-视频输入</string>
+    <string name="tnn_menu_title">选择功能</string>
+    <string name="tnn_menu_segmentation">人像切割</string>
+    <string name="tnn_menu_stylization">图像风格化</string>
+    <string name="tnn_menu_segmentation_and_stylization">人像切割+图像风格化</string>
 </resources>
