@@ -8,4 +8,5 @@ public class HairSegmentation {
     public native int deinit();
     public native int setHairColor(byte[] rgba);
     public native ImageInfo[] predictFromStream(byte[] yuv420sp, int width, int height, int rotate);
+    public native ImageInfo[] predictFromPicture(Bitmap image, int width, int height);
 }
