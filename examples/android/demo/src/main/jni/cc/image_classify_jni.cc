@@ -121,7 +121,7 @@ JNIEXPORT JNICALL jobjectArray TNN_CLASSIFY(detectFromImage)(JNIEnv *env, jobjec
     }
 
     TNN_NS::BenchOption bench_option;
-    bench_option.forward_count = 20;
+    bench_option.forward_count = 1;
     std::vector<TNN_NS::ImageInfo> imageInfoList;
     gDetector->SetBenchOption(bench_option);
 

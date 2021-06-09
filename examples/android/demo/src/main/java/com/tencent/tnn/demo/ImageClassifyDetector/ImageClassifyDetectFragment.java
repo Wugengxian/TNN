@@ -31,7 +31,7 @@ public class ImageClassifyDetectFragment extends BaseFragment {
     private static final String IMAGE = "tiger_cat.jpg";
     private static final String STYLE_IMAGE = "candy.jpg";
     private static final String RESULT_LIST = "synset.txt";
-    private static final int NET_INPUT = 512;
+    private static final int NET_INPUT = 720;
     private ToggleButton mGPUSwitch;
     private Button mRunButton;
     private boolean mUseGPU = false;

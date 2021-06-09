@@ -48,10 +48,12 @@ public:
     virtual Status ProcessSDKOutput(std::shared_ptr<TNNSDKOutput> output);
     virtual std::shared_ptr<TNN_NS::Mat> ProcessSDKInputMat(std::shared_ptr<TNN_NS::Mat> mat,
                                                               std::string name);
-    virtual std::shared_ptr<Mat> ConvertImage(std::shared_ptr<Mat> image);
 
     DimsVector orig_dims;
+private:
+    std::shared_ptr<Mat> MergeImage(std::shared_ptr<Mat> image);
 };
+
 
 }
 

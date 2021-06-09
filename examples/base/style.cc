@@ -44,12 +44,9 @@ std::shared_ptr<Mat> Style::ProcessSDKInputMat(std::shared_ptr<Mat> input_mat,
     return input_mat;
 }
 
-std::shared_ptr<Mat> Style::ConvertImage(std::shared_ptr<Mat> image) {
-    auto new_dim = *new DimsVector(4);
-    new_dim[0] = 1;
+std::shared_ptr<Mat> Style::MergeImage(std::shared_ptr<Mat> image) {
+    auto new_dim = image->GetDims();
     new_dim[1] = 4;
-    new_dim[2] = image->GetDim(2);
-    new_dim[3] = image->GetDim(3);
     auto merged_image = std::make_shared<Mat>(image->GetDeviceType(), N8UC4, new_dim);
     auto alpha_data = static_cast<float *>(image->GetData());
     auto merged_image_data = static_cast<uint8_t *>(merged_image->GetData());
@@ -72,6 +69,8 @@ std::shared_ptr<Mat> Style::ConvertImage(std::shared_ptr<Mat> image) {
 
 MatConvertParam Style::GetConvertParamForInput(std::string tag) {
     MatConvertParam input_cvt_param;
+    input_cvt_param.scale = {1.0, 1.0, 1.0, 0.0};
+    input_cvt_param.bias  = {0, 0,   0,   0.0};
     return input_cvt_param;
 }
 
@@ -84,7 +83,7 @@ Status Style::ProcessSDKOutput(std::shared_ptr<TNNSDKOutput> output_) {
     auto output = dynamic_cast<StyleOutput *>(output_.get());
     RETURN_VALUE_ON_NEQ(!output, false,
                         Status(TNNERR_PARAM_ERR, "TNNSDKOutput is invalid"));
-    output->image = ImageInfo(ConvertImage(output->GetMat("output")));
+    output->image = ImageInfo(MergeImage(output->GetMat("output")));
 
     return status;
 }
