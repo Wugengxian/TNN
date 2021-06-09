@@ -52,11 +52,11 @@ std::shared_ptr<Mat> Style::MergeImage(std::shared_ptr<Mat> image) {
     auto merged_image_data = static_cast<uint8_t *>(merged_image->GetData());
 
     auto hw = new_dim[2] * new_dim[3];
-    auto channel = new_dim[1];
+    auto channel = 3;
     for(int s=0; s<hw; ++s) {
-        float c0 = alpha_data[s*channel + 0];
-        float c1 = alpha_data[s*channel + 1];
-        float c2 = alpha_data[s*channel + 2];
+        float c0 = alpha_data[hw * 0 + s];
+        float c1 = alpha_data[hw * 1 + s];
+        float c2 = alpha_data[hw * 2 + s];
         float c3 = 255;
 
         merged_image_data[s*4 + 0] = static_cast<uint8_t>(std::min(255.0f, std::max(0.0f, c0)));
