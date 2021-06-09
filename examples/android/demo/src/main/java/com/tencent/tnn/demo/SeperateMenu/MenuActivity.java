@@ -7,9 +7,11 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
+import com.tencent.tnn.demo.ImageClassifyDetector.ImageClassifyDetectActivity;
 import com.tencent.tnn.demo.ImageFaceDetector.ImageFaceDetectActivity;
 import com.tencent.tnn.demo.R;
 import com.tencent.tnn.demo.StreamFaceDetector.StreamFaceDetectActivity;
+import com.tencent.tnn.demo.StreamHairSegmentation.StreamHairSegmentationActivity;
 
 
 public class MenuActivity extends Activity {
@@ -37,7 +39,7 @@ public class MenuActivity extends Activity {
                     isShowedActivity = true;
                     Intent intent = new Intent();
                     Activity activity = MenuActivity.this;
-                    intent.setClass(activity, StreamFaceDetectActivity.class);
+                    intent.setClass(activity, StreamHairSegmentationActivity.class);
                     activity.startActivity(intent);
                 }
             }
@@ -49,23 +51,23 @@ public class MenuActivity extends Activity {
                     isShowedActivity = true;
                     Intent intent = new Intent();
                     Activity activity = MenuActivity.this;
-                    intent.setClass(activity, ImageFaceDetectActivity.class);
+                    intent.setClass(activity, ImageClassifyDetectActivity.class);
                     activity.startActivity(intent);
                 }
             }
         });
-        findViewById(R.id.tnn_menu_segmentation_and_stylization_btn).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!isShowedActivity) {
-                    isShowedActivity = true;
-                    Intent intent = new Intent();
-                    Activity activity = MenuActivity.this;
-                    intent.setClass(activity, StreamFaceDetectActivity.class);
-                    activity.startActivity(intent);
-                }
-            }
-        });
+//        findViewById(R.id.tnn_menu_segmentation_and_stylization_btn).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                if (!isShowedActivity) {
+//                    isShowedActivity = true;
+//                    Intent intent = new Intent();
+//                    Activity activity = MenuActivity.this;
+//                    intent.setClass(activity, StreamFaceDetectActivity.class);
+//                    activity.startActivity(intent);
+//                }
+//            }
+//        });
         findViewById(R.id.back_rl).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

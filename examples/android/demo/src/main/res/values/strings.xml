@@ -21,4 +21,7 @@
     <string name="tnn_menu_segmentation">人像切割</string>
     <string name="tnn_menu_stylization">图像风格化</string>
     <string name="tnn_menu_segmentation_and_stylization">人像切割+图像风格化</string>
+    <string name="content_picture">Content Picture</string>
+    <string name="stylepicture">StylePicture</string>
+    <string name="result">Result</string>
 </resources>
