@@ -15,14 +15,12 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import com.tencent.tnn.demo.FileUtils;
-import com.tencent.tnn.demo.Helper;
 import com.tencent.tnn.demo.ImageClassify;
 import com.tencent.tnn.demo.ImageInfo;
 import com.tencent.tnn.demo.R;
 import com.tencent.tnn.demo.common.fragment.BaseFragment;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 
 
 public class ImageClassifyDetectFragment extends BaseFragment {
@@ -31,6 +29,7 @@ public class ImageClassifyDetectFragment extends BaseFragment {
     private ImageClassify mImageClassify = new ImageClassify();
 
     private static final String IMAGE = "tiger_cat.jpg";
+    private static final String STYLE_IMAGE = "candy.jpg";
     private static final String RESULT_LIST = "synset.txt";
     private static final int NET_INPUT = 512;
     private ToggleButton mGPUSwitch;
@@ -110,7 +109,7 @@ public class ImageClassifyDetectFragment extends BaseFragment {
     @Override
     public void setFragmentView() {
         Log.d(TAG, "setFragmentView");
-        setView(R.layout.fragment_image_detector);
+        setView(R.layout.triple_image_show);
         setTitleGone();
         $$(R.id.back_rl);
         $$(R.id.gpu_switch);
@@ -145,8 +144,12 @@ public class ImageClassifyDetectFragment extends BaseFragment {
         });
 
         final Bitmap originBitmap = FileUtils.readBitmapFromFile(getActivity().getAssets(), IMAGE);
-        ImageView source = (ImageView)$(R.id.origin);
-        source.setImageBitmap(originBitmap);
+        ImageView contentImage = (ImageView)$(R.id.contentPicture);
+        contentImage.setImageBitmap(originBitmap);
+
+        final Bitmap styleBitmap = FileUtils.readBitmapFromFile(getActivity().getAssets(), STYLE_IMAGE);
+        ImageView styleImage = (ImageView)$(R.id.stylePicture);
+        styleImage.setImageBitmap(styleBitmap);
     }
 
     @Override
@@ -167,13 +170,13 @@ public class ImageClassifyDetectFragment extends BaseFragment {
 
     private void startDetect() {
 
-        ArrayList<String> result_list = FileUtils.ReadListFromFile(getActivity().getAssets(), RESULT_LIST);
         final Bitmap originBitmap = FileUtils.readBitmapFromFile(getActivity().getAssets(), IMAGE);
 
         final Bitmap scaleBitmap = Bitmap.createScaledBitmap(originBitmap, NET_INPUT, NET_INPUT, false);
-        ImageView source = (ImageView)$(R.id.origin);
+        ImageView source = (ImageView)$(R.id.contentPicture);
         source.setImageBitmap(originBitmap);
         String modelPath = initModel();
+        ImageView resultPicture = (ImageView)$(R.id.resultPicture);
         Log.d(TAG, "Init classify " + modelPath);
         int device = 0;
         if (mUseHuaweiNpu) {
@@ -189,7 +192,7 @@ public class ImageClassifyDetectFragment extends BaseFragment {
             ByteBuffer buffer = ByteBuffer.wrap(imageInfo.data);
             bitmap.copyPixelsFromBuffer(buffer);
             Bitmap scaleBitmap2 = Bitmap.createScaledBitmap(bitmap, originBitmap.getWidth(), originBitmap.getHeight(), false);
-            source.setImageBitmap(scaleBitmap2);
+            resultPicture.setImageBitmap(scaleBitmap2);
             mImageClassify.deinit();
         } else {
             Log.e(TAG, "failed to init model " + result);
