@@ -170,3 +170,72 @@ JNIEXPORT JNICALL jobjectArray TNN_HAIR_SEGMENTATION(predictFromStream)(JNIEnv *
     }
 
 }
+
+JNIEXPORT JNICALL jobjectArray TNN_HAIR_SEGMENTATION(predictFromPicture)(JNIEnv *env, jobject thiz, jobject imageSource, jint width, jint height) {
+    // TODO: implement predictFromPicture()
+    jobjectArray imageInfoArray;
+    int ret = -1;
+    AndroidBitmapInfo  sourceInfocolor;
+    void*              sourcePixelscolor;
+
+    if (AndroidBitmap_getInfo(env, imageSource, &sourceInfocolor) < 0) {
+        return 0;
+    }
+
+    if (sourceInfocolor.format != ANDROID_BITMAP_FORMAT_RGBA_8888) {
+        return 0;
+    }
+
+    if ( AndroidBitmap_lockPixels(env, imageSource, &sourcePixelscolor) < 0) {
+        return 0;
+    }
+
+    TNN_NS::BenchOption bench_option;
+    bench_option.forward_count = 1;
+    std::vector<TNN_NS::ImageInfo> imageInfoList;
+    gSegmentator->SetBenchOption(bench_option);
+
+    TNN_NS::DeviceType dt = TNN_NS::DEVICE_ARM;
+    TNN_NS::DimsVector target_dims = {1, 4, height, width};
+    std::shared_ptr<TNN_NS::Mat> input_mat = std::make_shared<TNN_NS::Mat>(dt, TNN_NS::N8UC4, target_dims, sourcePixelscolor);
+    int resultList[1];
+
+    std::shared_ptr<TNN_NS::TNNSDKInput> input = std::make_shared<TNN_NS::TNNSDKInput>(input_mat);
+    std::shared_ptr<TNN_NS::TNNSDKOutput> output = gSegmentator->CreateSDKOutput();
+    TNN_NS::Status status = gSegmentator->Predict(input, output);
+    //get output map
+//    gDetector->ProcessSDKOutput(output);
+
+    imageInfoList.push_back(dynamic_cast<TNN_NS::HairSegmentationOutput *>(output.get())->hair_mask);
+    imageInfoList.push_back(dynamic_cast<TNN_NS::HairSegmentationOutput *>(output.get())->merged_image);
+
+    AndroidBitmap_unlockPixels(env, imageSource);
+
+    if (status != TNN_NS::TNN_OK) {
+        return 0;
+    }
+    if (imageInfoList.size() > 0) {
+        imageInfoArray = env->NewObjectArray(imageInfoList.size(), clsImageInfo, NULL);
+        for (int i = 0; i < imageInfoList.size(); i++) {
+            jobject objImageInfo = env->NewObject(clsImageInfo, midconstructorImageInfo);
+            int image_width = imageInfoList[i].image_width;
+            int image_height = imageInfoList[i].image_height;
+            int image_channel = imageInfoList[i].image_channel;
+            int dataNum = image_channel * image_width * image_height;
+
+            env->SetIntField(objImageInfo, fidimage_width, image_width);
+            env->SetIntField(objImageInfo, fidimage_height, image_height);
+            env->SetIntField(objImageInfo, fidimage_channel, image_channel);
+
+            jbyteArray jarrayData = env->NewByteArray(dataNum);
+            env->SetByteArrayRegion(jarrayData, 0, dataNum , (jbyte*)imageInfoList[i].data.get());
+            env->SetObjectField(objImageInfo, fiddata, jarrayData);
+
+            env->SetObjectArrayElement(imageInfoArray, i, objImageInfo);
+            env->DeleteLocalRef(objImageInfo);
+        }
+        return imageInfoArray;
+    } else {
+        return 0;
+    }
+}

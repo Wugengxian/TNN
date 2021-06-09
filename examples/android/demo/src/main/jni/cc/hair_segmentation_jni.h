@@ -25,6 +25,7 @@ JNIEXPORT JNICALL jint TNN_HAIR_SEGMENTATION(deinit)(JNIEnv *env, jobject thiz);
 JNIEXPORT JNICALL jboolean TNN_HAIR_SEGMENTATION(checkNpu)(JNIEnv *env, jobject thiz, jstring modelPath);
 JNIEXPORT JNICALL jint TNN_HAIR_SEGMENTATION(setHairColor)(JNIEnv *env, jobject thiz, jbyteArray rgba);
 JNIEXPORT JNICALL jobjectArray TNN_HAIR_SEGMENTATION(predictFromStream)(JNIEnv *env, jobject thiz, jbyteArray yuv420sp, jint width, jint height, jint rotate);
+JNIEXPORT JNICALL jobjectArray TNN_HAIR_SEGMENTATION(predictFromPicture)(JNIEnv *env, jobject thiz, jobject imageSource, jint width, jint height);
 
 #ifdef __cplusplus
 }
