@@ -2,6 +2,7 @@ package com.tencent.tnn.demo.ImageClassifyDetector;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -31,7 +32,7 @@ public class ImageClassifyDetectFragment extends BaseFragment {
 
     private static final String IMAGE = "tiger_cat.jpg";
     private static final String RESULT_LIST = "synset.txt";
-    private static final int NET_INPUT = 224;
+    private static final int NET_INPUT = 512;
     private ToggleButton mGPUSwitch;
     private Button mRunButton;
     private boolean mUseGPU = false;
@@ -188,7 +189,6 @@ public class ImageClassifyDetectFragment extends BaseFragment {
             ByteBuffer buffer = ByteBuffer.wrap(imageInfo.data);
             bitmap.copyPixelsFromBuffer(buffer);
             Bitmap scaleBitmap2 = Bitmap.createScaledBitmap(bitmap, originBitmap.getWidth(), originBitmap.getHeight(), false);
-            source.setImageDrawable(null);
             source.setImageBitmap(scaleBitmap2);
             mImageClassify.deinit();
         } else {
