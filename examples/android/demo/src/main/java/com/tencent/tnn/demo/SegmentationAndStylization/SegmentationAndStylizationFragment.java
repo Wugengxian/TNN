@@ -183,7 +183,7 @@ public class SegmentationAndStylizationFragment extends BaseFragment {
 
 
     private void startDetect() {
-
+        long startTime = System.currentTimeMillis();
         final Bitmap originBitmap = FileUtils.readBitmapFromFile(getActivity().getAssets(), IMAGE);
 
         final Bitmap scaleBitmap = Bitmap.createScaledBitmap(originBitmap, NET_INPUT, NET_INPUT, false);
@@ -224,8 +224,7 @@ public class SegmentationAndStylizationFragment extends BaseFragment {
                 for (int y = 0; y < height; y++) {
                     if (mask[index] == 0) {
                         styleBitmap.setPixel(x, y, originBitmap.getPixel(x, y));
-                    }
-                    else{
+                    } else {
                         Log.d(TAG, "styled");
                     }
                     index++;
@@ -236,6 +235,10 @@ public class SegmentationAndStylizationFragment extends BaseFragment {
         } else {
             Log.e(TAG, "failed to init segmentation model " + result);
         }
+        TextView result_view = (TextView)$(R.id.timeCost);
+        long timeCost = System.currentTimeMillis()-startTime;
+        String s = "time cost : "+timeCost/1000.0+"s";
+        result_view.setText(s);
     }
 
     @Override
