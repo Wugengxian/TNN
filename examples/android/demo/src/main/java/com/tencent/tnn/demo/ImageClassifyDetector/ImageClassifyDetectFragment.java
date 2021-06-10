@@ -15,6 +15,7 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import com.tencent.tnn.demo.FileUtils;
+import com.tencent.tnn.demo.Helper;
 import com.tencent.tnn.demo.ImageClassify;
 import com.tencent.tnn.demo.ImageInfo;
 import com.tencent.tnn.demo.R;
@@ -169,7 +170,7 @@ public class ImageClassifyDetectFragment extends BaseFragment {
 
 
     private void startDetect() {
-
+        long startTime = System.currentTimeMillis();
         final Bitmap originBitmap = FileUtils.readBitmapFromFile(getActivity().getAssets(), IMAGE);
 
         final Bitmap scaleBitmap = Bitmap.createScaledBitmap(originBitmap, NET_INPUT, NET_INPUT, false);
@@ -197,6 +198,10 @@ public class ImageClassifyDetectFragment extends BaseFragment {
         } else {
             Log.e(TAG, "failed to init model " + result);
         }
+        TextView result_view = (TextView)$(R.id.timeCost);
+        long timeCost = System.currentTimeMillis()-startTime;
+        String s = "time cost : "+timeCost/1000.0+"s";
+        result_view.setText(s);
     }
 
     @Override
