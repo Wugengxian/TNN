@@ -52,7 +52,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="32dp"
                 android:gravity="center"
-                android:text="头发颜色： "
+                android:text="人像颜色： "
                 android:textSize="18dp" />
 
             <RadioGroup
