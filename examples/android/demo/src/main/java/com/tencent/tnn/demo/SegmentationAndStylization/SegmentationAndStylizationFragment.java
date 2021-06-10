@@ -211,7 +211,7 @@ public class SegmentationAndStylizationFragment extends BaseFragment {
         } else {
             Log.e(TAG, "failed to init stylization model " + result);
         }
-        result = mHairSegmentation.init(modelPath, NET_INPUT, NET_INPUT, device);
+        result = mHairSegmentation.init(modelPath, NET_INPUT, NET_INPUT, "segmentation", device);
         if (result == 0) {
             ImageInfo[] indexArray = mHairSegmentation.predictFromPicture(originBitmap, NET_INPUT, NET_INPUT);
             ImageInfo imageInfo = indexArray[0];
@@ -222,7 +222,7 @@ public class SegmentationAndStylizationFragment extends BaseFragment {
             int width = styleBitmap.getWidth();
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
-                    if (mask[index] == 0) {
+                    if (mask[index*4] == 0) {
                         styleBitmap.setPixel(x, y, originBitmap.getPixel(x, y));
                     } else {
                         Log.d(TAG, "styled");

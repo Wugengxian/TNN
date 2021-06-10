@@ -61,8 +61,21 @@ public class StreamHairSegmentationFragment extends BaseFragment {
     private boolean mUseHuaweiNpu = false;
     private TextView HuaweiNpuTextView;
 
+    private int width = 640, height = 480;
+    private String modelname;
+
     private boolean mDeviceSwiched = false;
     private byte[] mColor = {(byte)0, (byte)0, (byte)185, (byte)90};
+    public static final StreamHairSegmentationFragment newInstance(int height, int width, String modelname){
+        StreamHairSegmentationFragment fragment = new StreamHairSegmentationFragment();
+        Bundle bundle = new Bundle();
+        bundle.putInt("height",height);
+        bundle.putInt("width", width);
+        bundle.putString("modelname", modelname);
+        fragment.setArguments(bundle);
+
+        return fragment ;
+    }
 
     /**********************************     Get Preview Advised    **********************************/
 
@@ -73,6 +86,9 @@ public class StreamHairSegmentationFragment extends BaseFragment {
         System.loadLibrary("tnn_wrapper");
         //start SurfaceHolder
         mDemoSurfaceHolder = new DemoSurfaceHolder(this);
+        height = getArguments().getInt("height");
+        width = getArguments().getInt("width");
+        modelname = getArguments().getString("modelname");
         String modelPath = initModel();
         NpuEnable = mHairSegmentation.checkNpu(modelPath);
     }
@@ -83,8 +99,8 @@ public class StreamHairSegmentationFragment extends BaseFragment {
 
         // copy segmentation model to sdcard
         String[] modelPathsSegmentation = {
-                "segmentation.tnnmodel",
-                "segmentation.tnnproto",
+                modelname + ".tnnmodel",
+                modelname + ".tnnproto",
         };
 
         for (int i = 0; i < modelPathsSegmentation.length; i++) {
@@ -357,7 +373,7 @@ public class StreamHairSegmentationFragment extends BaseFragment {
                     } else if (mUseGPU) {
                         device = 1;
                     }
-                    int ret = mHairSegmentation.init(modelPath, mCameraHeight, mCameraWidth, device);
+                    int ret = mHairSegmentation.init(modelPath, mCameraHeight, mCameraWidth, modelname, device);
                     if (ret == 0) {
                         mIsSegmentingHair = true;
                     } else {
@@ -401,7 +417,7 @@ public class StreamHairSegmentationFragment extends BaseFragment {
                                 } else if (mUseGPU) {
                                     device = 1;
                                 }
-                                int ret = mHairSegmentation.init(modelPath, mCameraHeight, mCameraWidth, device);
+                                int ret = mHairSegmentation.init(modelPath, mCameraHeight, mCameraWidth, modelname, device);
                                 if (ret == 0) {
                                     mIsSegmentingHair = true;
                                     mHairSegmentation.setHairColor(mColor);

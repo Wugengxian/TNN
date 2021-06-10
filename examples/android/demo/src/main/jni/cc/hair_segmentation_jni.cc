@@ -31,14 +31,15 @@ static jfieldID fidimage_channel;
 static jfieldID fiddata;
 // Jni functions
 
-JNIEXPORT JNICALL jint TNN_HAIR_SEGMENTATION(init)(JNIEnv *env, jobject thiz, jstring modelPath, jint width, jint height, jint computeUnitType) {
+JNIEXPORT JNICALL jint TNN_HAIR_SEGMENTATION(init)(JNIEnv *env, jobject thiz, jstring modelPath, jint width, jint height, jstring modelname, jint computeUnitType) {
     // Reset bench description
     setBenchResult("");
     gSegmentator = std::make_shared<TNN_NS::HairSegmentation>();
     std::string protoContent, modelContent;
     std::string modelPathStr(jstring2string(env, modelPath));
-    protoContent = fdLoadFile(modelPathStr + "/segmentation.tnnproto");
-    modelContent = fdLoadFile(modelPathStr + "/segmentation.tnnmodel");
+    const char *name = env->GetStringUTFChars(modelname, JNI_FALSE);
+    protoContent = fdLoadFile(modelPathStr + "/" + name + ".tnnproto");
+    modelContent = fdLoadFile(modelPathStr + "/" + name + ".tnnmodel");
     LOGI("proto content size %d model content size %d", protoContent.length(), modelContent.length());
     gComputeUnitType = computeUnitType;
 
@@ -47,8 +48,9 @@ JNIEXPORT JNICALL jint TNN_HAIR_SEGMENTATION(init)(JNIEnv *env, jobject thiz, js
     option->library_path = "";
     option->proto_content = protoContent;
     option->model_content = modelContent;
-    option->input_width = 640;
-    option->input_height = 480;
+    option->input_width = width;
+    option->input_height = height;
+    option->picture = 1;
     option->mode = 0;
     if (gComputeUnitType == 1) {
         option->compute_units = TNN_NS::TNNComputeUnitsGPU;
@@ -191,14 +193,12 @@ JNIEXPORT JNICALL jobjectArray TNN_HAIR_SEGMENTATION(predictFromPicture)(JNIEnv 
     }
 
     TNN_NS::BenchOption bench_option;
-    bench_option.forward_count = 1;
     std::vector<TNN_NS::ImageInfo> imageInfoList;
     gSegmentator->SetBenchOption(bench_option);
 
     TNN_NS::DeviceType dt = TNN_NS::DEVICE_ARM;
-    TNN_NS::DimsVector target_dims = {1, 4, height, width};
+    TNN_NS::DimsVector target_dims = {1, 3, height, width};
     std::shared_ptr<TNN_NS::Mat> input_mat = std::make_shared<TNN_NS::Mat>(dt, TNN_NS::N8UC4, target_dims, sourcePixelscolor);
-    int resultList[1];
 
     std::shared_ptr<TNN_NS::TNNSDKInput> input = std::make_shared<TNN_NS::TNNSDKInput>(input_mat);
     std::shared_ptr<TNN_NS::TNNSDKOutput> output = gSegmentator->CreateSDKOutput();

@@ -205,6 +205,9 @@ public class MainActivity extends Activity {
                     isShowedActivity = true;
                     Intent intent = new Intent();
                     Activity activity = MainActivity.this;
+                    intent.putExtra("height", 480);
+                    intent.putExtra("width", 640);
+                    intent.putExtra("modelname", "segmentation");
                     intent.setClass(activity, StreamHairSegmentationActivity.class);
                     activity.startActivity(intent);
                 }
@@ -218,7 +221,10 @@ public class MainActivity extends Activity {
                     isShowedActivity = true;
                     Intent intent = new Intent();
                     Activity activity = MainActivity.this;
-                    intent.setClass(activity, StreamPoseDetectLandmarkActivity.class);
+                    intent.setClass(activity, StreamHairSegmentationActivity.class);
+                    intent.putExtra("height", 480);
+                    intent.putExtra("width", 640);
+                    intent.putExtra("modelname", "segmentation4");
                     activity.startActivity(intent);
                 }
             }

@@ -50,6 +50,7 @@ public:
     int input_width;
     int input_height;
     int num_thread = 1;
+    int picture = 0;
     // the processing mode of output mask
     int mode = 0;
 };

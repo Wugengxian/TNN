@@ -20,7 +20,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-JNIEXPORT JNICALL jint TNN_HAIR_SEGMENTATION(init)(JNIEnv *env, jobject thiz, jstring modelPath, jint width, jint height, jint computeUnitType);
+JNIEXPORT JNICALL jint TNN_HAIR_SEGMENTATION(init)(JNIEnv *env, jobject thiz, jstring modelPath, jint width, jint height, jstring modelname, jint computeUnitType);
 JNIEXPORT JNICALL jint TNN_HAIR_SEGMENTATION(deinit)(JNIEnv *env, jobject thiz);
 JNIEXPORT JNICALL jboolean TNN_HAIR_SEGMENTATION(checkNpu)(JNIEnv *env, jobject thiz, jstring modelPath);
 JNIEXPORT JNICALL jint TNN_HAIR_SEGMENTATION(setHairColor)(JNIEnv *env, jobject thiz, jbyteArray rgba);

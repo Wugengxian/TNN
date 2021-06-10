@@ -55,7 +55,6 @@ Status HairSegmentation::Init(std::shared_ptr<TNNSDKOption> option_i) {
     auto input_dims = GetInputShape();
     option->input_height = input_dims[2];
     option->input_width  = input_dims[3];
-    
     return status;
 }
 
@@ -73,6 +72,7 @@ std::shared_ptr<TNNSDKOutput> HairSegmentation::CreateSDKOutput() {
 std::shared_ptr<Mat> HairSegmentation::ProcessSDKInputMat(std::shared_ptr<Mat> input_image, std::string name) {
     RETURN_VALUE_ON_NEQ(input_image->GetMatType(), N8UC4, nullptr);
     this->orig_dims = input_image->GetDims();
+    this->orig_dims[1] = 4;
     // save input image mat for merging
     auto dims = input_image->GetDims();
     //dims[1] = 4;
@@ -105,7 +105,7 @@ std::shared_ptr<Mat> HairSegmentation::MergeImage(std::shared_ptr<Mat> alpha, RG
     auto merged_image_data = static_cast<uint8_t *>(merged_image->GetData());
 
     auto hw = orig_dims[2] * orig_dims[3];
-    auto channel = orig_dims[1];
+    auto channel = input_image->GetDims()[1];
     for(int s=0; s<hw; ++s) {
         float hair_conf = alpha_data[s];
         //float bg_conf   = 1 - hair_conf;
@@ -160,7 +160,7 @@ std::shared_ptr<Mat> HairSegmentation::ProcessAlpha(std::shared_ptr<Mat> alpha, 
             auto count = DimsVectorUtils::Count(rtn->GetDims());
             // clip
             auto clip = [](float& val) {
-                val = val > 0.5? 1 :(val < 0.5? 0:val);
+                val = val > 0.5 ? 1 :(val < 0.5? 0:val);
             };
             std::for_each(data, data+count, clip);
         }
@@ -213,7 +213,7 @@ std::shared_ptr<Mat> HairSegmentation::GenerateAlphaImage(std::shared_ptr<Mat> a
     auto alpha_dims = alpha->GetDims();
     auto hw = alpha_dims[2] * alpha_dims[3];
     for(int i=0; i<hw; ++i) {
-        float val = static_cast<uint8_t>(std::min(255.0, std::max(0.0, alpha_data[i]*255.0)));
+        uint8_t val = static_cast<uint8_t>(std::min(255.0, std::max(0.0, alpha_data[i]*255.0)));
         alpha_image_data[i*4 + 0] = val;
         alpha_image_data[i*4 + 1] = val;
         alpha_image_data[i*4 + 2] = val;
