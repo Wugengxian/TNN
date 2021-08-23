@@ -213,17 +213,17 @@ public class SegmentationAndStylizationFragment extends BaseFragment {
         }
         result = mHairSegmentation.init(modelPath, NET_INPUT, NET_INPUT, "segmentation", device);
         if (result == 0) {
-            ImageInfo[] indexArray = mHairSegmentation.predictFromPicture(originBitmap, NET_INPUT, NET_INPUT);
+            ImageInfo[] indexArray = mHairSegmentation.predictFromPicture(originBitmap, originBitmap.getWidth(), originBitmap.getHeight());
             ImageInfo imageInfo = indexArray[0];
             byte[] mask = imageInfo.data;
             int index = 0;
             assert styleBitmap != null;
             int height = styleBitmap.getHeight();
             int width = styleBitmap.getWidth();
-            for (int x = 0; x < width; x++) {
-                for (int y = 0; y < height; y++) {
+            for (int x = 0; x < height; x++) {
+                for (int y = 0; y < width; y++) {
                     if (mask[index*4] == 0) {
-                        styleBitmap.setPixel(x, y, originBitmap.getPixel(x, y));
+                        styleBitmap.setPixel(y, x, originBitmap.getPixel(y, x));
                     } else {
                         Log.d(TAG, "styled");
                     }
